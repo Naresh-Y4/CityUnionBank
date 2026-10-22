@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>City Union Bank ATM Simulator (educational demo)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="machine">
+  <p class="sign">CITY UNION BANK ATM</p>
+
+  <div class="bezel">
+    <div class="display">
+      <!-- Physical selection keys beside the screen -->
+      <div class="keys l" aria-label="Left selection keys">
+        <button class="sk" data-sk="L1" aria-label="Left key 1"></button><button class="sk" data-sk="L2" aria-label="Left key 2"></button>
+        <button class="sk" data-sk="L3" aria-label="Left key 3"></button><button class="sk" data-sk="L4" aria-label="Left key 4"></button>
+      </div>
+      <div class="keys r" aria-label="Right selection keys">
+        <button class="sk" data-sk="R1" aria-label="Right key 1"></button><button class="sk" data-sk="R2" aria-label="Right key 2"></button>
+        <button class="sk" data-sk="R3" aria-label="Right key 3"></button><button class="sk" data-sk="R4" aria-label="Right key 4"></button>
+      </div>
+
+      <div class="atm">
+        <div class="bar-top">
+          <img class="logo" src="image.png" alt="City Union Bank logo">
+          <p class="bank-name">CITY UNION BANK LTD</p>
+        </div>
+
+        <div class="screens">
+          <!-- 01 Welcome -->
+          <section class="screen" data-screen="welcome">
+            <div class="main full"><h1 tabindex="-1">WELCOME TO OUR 24HR ATM SERVICE</h1><p>PLEASE INSERT YOUR CARD</p></div>
+            <button type="button" class="opt wide" data-key="R4" id="cardless">PRESS HERE FOR CARDLESS TRANSACTION</button>
+          </section>
+
+          <!-- 02 Enter PIN -->
+          <form class="screen" data-screen="pin" id="f-pin" novalidate autocomplete="off" hidden>
+            <div class="main">
+              <h1 tabindex="-1">ENTER YOUR PIN</h1>
+              <div class="field"><label for="pin">PIN:</label>
+                <input id="pin" type="password" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="••••" aria-describedby="pin-msg"></div>
+              <p class="msg" id="pin-msg" role="status"></p>
+            </div>
+            <button type="submit" class="opt" data-key="L4">CONTINUE</button>
+            <button type="button" class="opt" data-key="R4" data-cancel>CANCEL</button>
+          </form>
+
+          <!-- 03 Main menu -->
+          <section class="screen" data-screen="menu" id="menu" hidden>
+            <div class="main"><h1 tabindex="-1">SELECT YOUR TRANSACTION</h1></div>
+            <button type="button" class="opt" data-key="L1" data-go="withdraw">Cash withdrawl</button>
+            <button type="button" class="opt" data-key="L2" data-go="balance">Balance enquiry</button>
+            <button type="button" class="opt" data-key="L3" data-go="deposit">cash deposite</button>
+            <button type="button" class="opt" data-key="R1" data-go="statement">Mini statement</button>
+            <button type="button" class="opt" data-key="R2" data-go="transfer">Fund transfer</button>
+            <button type="button" class="opt" data-key="R3" data-go="changepin">Pin change</button>
+            <button type="button" class="opt" data-key="R4" data-cancel>EXIT</button>
+          </section>
+
+          <!-- 04 Withdraw cash -->
+          <form class="screen" data-screen="withdraw" id="f-withdraw" novalidate autocomplete="off" hidden>
+            <div class="main">
+              <h1 tabindex="-1">WITHDRAW CASH</h1>
+              <div class="field"><label for="amount">ENTER AMOUNT:</label>
+                <input id="amount" class="amount" type="text" inputmode="numeric" maxlength="6" autocomplete="off" aria-describedby="amount-msg"></div>
+              <p class="msg" id="amount-msg" role="status"></p>
+            </div>
+            <button type="button" class="opt" data-key="L1" data-quick="500">Rs:500</button>
+            <button type="button" class="opt" data-key="L2" data-quick="1000">Rs:1000</button>
+            <button type="button" class="opt" data-key="L3" data-quick="2000">Rs:2000</button>
+            <button type="button" class="opt" data-key="R1" data-quick="5000">Rs:5000</button>
+            <button type="button" class="opt" data-key="R2" data-quick="10000">Rs:10000</button>
+            <button type="button" class="opt" data-key="R3" data-quick="20000">Rs:20000</button>
+            <button type="submit" class="opt" data-key="L4">CONTINUE</button>
+            <button type="button" class="opt" data-key="R4" data-cancel>CANCEL</button>
+          </form>
+
+          <!-- Confirm (withdraw / deposit / transfer) -->
+          <form class="screen" data-screen="confirm" id="f-confirm" hidden>
+            <div class="main"><h1 tabindex="-1">PLEASE CONFIRM</h1><div id="confirm-lines"></div></div>
+            <button type="submit" class="opt" data-key="L4">CONFIRM</button>
+            <button type="button" class="opt" data-key="R4" data-cancel>CANCEL</button>
+          </form>
+
+          <!-- Processing -->
+          <section class="screen" data-screen="processing" hidden>
+            <div class="main full"><h1 tabindex="-1">PLEASE WAIT</h1><p>PROCESSING YOUR TRANSACTION</p>
+              <div class="dots" aria-hidden="true"><span></span><span></span><span></span></div></div>
+          </section>
+
+          <!-- Collect cash -->
+          <section class="screen" data-screen="collect" hidden>
+            <div class="main full"><h1 tabindex="-1">PLEASE COLLECT YOUR CASH</h1><p>TAKE THE NOTES FROM THE CASH TRAY</p></div>
+          </section>
+
+          <!-- Receipt? -->
+          <section class="screen" data-screen="receiptq" hidden>
+            <div class="main full"><h1 tabindex="-1">DO YOU WANT A RECEIPT?</h1></div>
+            <button type="button" class="opt" data-key="L1" id="rq-yes">YES</button>
+            <button type="button" class="opt" data-key="R1" id="rq-no">NO</button>
+          </section>
+
+          <!-- Another transaction? -->
+          <section class="screen" data-screen="another" hidden>
+            <div class="main full"><h1 tabindex="-1">DO YOU WANT ANOTHER TRANSACTION?</h1></div>
+            <button type="button" class="opt" data-key="L1" id="an-yes">YES</button>
+            <button type="button" class="opt" data-key="R1" id="an-no">NO</button>
+          </section>
+
+          <!-- 05 Balance inquiry -->
+          <section class="screen" data-screen="balance" hidden>
+            <div class="main"><h1 tabindex="-1">Balance Inquiry</h1><p id="balance-text">Avilable Balance:25000</p></div>
+            <button type="button" class="opt" data-key="L4" id="balance-print">PRINT</button>
+            <button type="button" class="opt" data-key="R4" id="balance-back">BACK</button>
+          </section>
+
+          <!-- 06 Change PIN -->
+          <form class="screen" data-screen="changepin" id="f-changepin" novalidate autocomplete="off" hidden>
+            <div class="main">
+              <h1 tabindex="-1">CHANGE PIN</h1>
+              <div class="grid-fields">
+                <label for="pc-current">CURRENT PIN:</label><input id="pc-current" type="password" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="••••" aria-describedby="pc-msg">
+                <label for="pc-new">NEW PIN:</label><input id="pc-new" type="password" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="••••" aria-describedby="pc-msg">
+                <label for="pc-repeat">REENTER NEW PIN:</label><input id="pc-repeat" type="password" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="••••" aria-describedby="pc-msg">
+              </div>
+              <p class="msg" id="pc-msg" role="status"></p>
+            </div>
+            <button type="submit" class="opt" data-key="L4">CONFIRM</button>
+            <button type="button" class="opt" data-key="R4" id="pc-back">BACK</button>
+          </form>
+
+          <!-- 07 Mini statement -->
+          <section class="screen" data-screen="statement" hidden>
+            <div class="main"><h1 class="sr-only" tabindex="-1">Mini statement</h1><ul class="statement" id="statement-list"></ul></div>
+            <button type="button" class="opt" data-key="L4" id="statement-print">PRINT</button>
+            <button type="button" class="opt" data-key="R4" id="statement-finish">FINISH</button>
+          </section>
+
+          <!-- Deposit -->
+          <form class="screen" data-screen="deposit" id="f-deposit" novalidate autocomplete="off" hidden>
+            <div class="main">
+              <h1 tabindex="-1">DEPOSIT CASH</h1>
+              <div class="field"><label for="dep-amount">ENTER AMOUNT:</label>
+                <input id="dep-amount" class="amount" type="text" inputmode="numeric" maxlength="6" autocomplete="off" aria-describedby="dep-msg"></div>
+              <p class="msg" id="dep-msg" role="status"></p>
+            </div>
+            <button type="submit" class="opt" data-key="L4">CONTINUE</button>
+            <button type="button" class="opt" data-key="R4" data-cancel>CANCEL</button>
+          </form>
+
+          <!-- Fund transfer -->
+          <form class="screen" data-screen="transfer" id="f-transfer" novalidate autocomplete="off" hidden>
+            <div class="main">
+              <h1 tabindex="-1">FUND TRANSFER</h1>
+              <div class="grid-fields">
+                <label for="tr-account">ACCOUNT NO:</label><input id="tr-account" class="amount" type="text" inputmode="numeric" maxlength="10" autocomplete="off" aria-describedby="tr-msg">
+                <label for="tr-amount">AMOUNT:</label><input id="tr-amount" class="amount" type="text" inputmode="numeric" maxlength="6" autocomplete="off" aria-describedby="tr-msg">
+              </div>
+              <p class="msg" id="tr-msg" role="status"></p>
+            </div>
+            <button type="submit" class="opt" data-key="L4">CONTINUE</button>
+            <button type="button" class="opt" data-key="R4" data-cancel>CANCEL</button>
+          </form>
+
+          <!-- 08 Success -->
+          <section class="screen" data-screen="success" hidden>
+            <div class="main full big"><h1 tabindex="-1">TRANSACTION SUCCESSFULL</h1><p>PLEASE REMOVE YOUR CARD</p><p>THANK YOU! VISIT AGAIN</p></div>
+          </section>
+
+          <!-- 09 Cancellation -->
+          <section class="screen" data-screen="cancel" hidden>
+            <div class="main full big"><h1 tabindex="-1">TRANSACTION CANCELLED</h1><p>PLEASE REMOVE YOUR CARD</p><p>TRY AGAIN</p></div>
+          </section>
+
+          <!-- Card retained -->
+          <section class="screen" data-screen="blocked" hidden>
+            <div class="main full big"><h1 tabindex="-1">CARD RETAINED</h1><p>TOO MANY INCORRECT PIN ATTEMPTS</p><p>PLEASE CONTACT YOUR BRANCH</p></div>
+          </section>
+        </div>
+
+        <div class="bar-bottom"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hardware -->
+  <div class="lower">
+    <div class="bay">
+      <p class="bay-label">CARD</p>
+      <div class="well card-well">
+        <button type="button" class="card idle" id="card" aria-label="Insert card"><b>CITY UNION BANK</b><i></i></button>
+        <div class="slot s-bottom"></div>
+      </div>
+      <p class="bay-label">RECEIPT</p>
+      <div class="well paper-well">
+        <div class="slot s-top"></div>
+        <button type="button" class="paper" id="paper" hidden aria-label="Take receipt and open print dialog"><span id="paper-body"></span></button>
+      </div>
+    </div>
+
+    <div class="keypad" id="keypad" role="group" aria-label="Keypad">
+      <button data-pad="1">1</button><button data-pad="2">2</button><button data-pad="3">3</button><button class="k-cancel" data-pad="cancel">CANCEL</button>
+      <button data-pad="4">4</button><button data-pad="5">5</button><button data-pad="6">6</button><button class="k-clear" data-pad="clear">CLEAR</button>
+      <button data-pad="7">7</button><button data-pad="8">8</button><button data-pad="9">9</button><button class="k-enter" data-pad="enter">ENTER</button>
+      <button class="zero" data-pad="0">0</button>
+    </div>
+
+    <div class="bay">
+      <p class="bay-label">CASH</p>
+      <div class="well cash-well">
+        <div class="slot s-top wide-slot"></div>
+        <button type="button" class="cash" id="cash" hidden aria-label="Collect cash"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="receipt"></div>
+<script src="script.js"></script>
+</body>
+</html>
